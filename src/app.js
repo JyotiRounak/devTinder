@@ -47,12 +47,12 @@ app.post("/login", async(req, res)=>{
          if(!user){
             return res.status(400).send("user is not present with this emailId");
         }
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await user.verifyPassword(password);
         if(isPasswordValid){
             // create a jwt token
-            const token = jwt.sign({_id: user._id}, "devTinder@125#");
+            const token = await user.getJwt();
             // add the token to cookie and send back the response to user
-            res.cookie("token", token);
+            res.cookie("token", token, { expires: new Date(Date.now() + 900000), httpOnly: true });
             res.send("user logged in successfully");
         }
         else{
