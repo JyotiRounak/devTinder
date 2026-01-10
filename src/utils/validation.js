@@ -15,7 +15,12 @@ const vaildateSignupData = (req)=>{
     else if(!validator.isStrongPassword(password)){
         throw new Error("Password is not strong enough")
     }
-
 }
 
-module.exports = { vaildateSignupData};
+const validateProfileEditData = (req)=>{
+    const ALLOWERED_UPDATES = ["photUrl", "age", "about", "skills", "gender"];
+    const isUpdateAllowed = Object.keys(req.body).every((k)=> ALLOWERED_UPDATES.includes(k));
+    return true;
+}
+
+module.exports = { vaildateSignupData, validateProfileEditData};

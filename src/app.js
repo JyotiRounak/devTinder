@@ -1,92 +1,19 @@
 const express = require('express');
 const connecttoDatabase = require("./config/database");
 const User = require('./models/user');
-const {vaildateSignupData} = require("./utils/validation");
-const bcrypt = require('bcrypt');
-const validator = require('validator');
 const cookieParser = require('cookie-parser');
-const jwt = require("jsonwebtoken");
-const { userAuth} = require("./middleware/auth");
+const authRouter = require("./route/auth");
+const profileRouter = require("./route/profile");
+const requestRouter = require("./route/request");
+const userRouter = require('./route/user');
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-//
-app.post("/signup", async(req, res)=>{
-    try {
-    // validation of data
-    vaildateSignupData(req);
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+app.use("/", userRouter);
 
-    const { firstName, lastName, emailId, password} = req.body;
-
-    // encryption of password can be done here
-    const passwordHash = await bcrypt.hash(password, 10);
-    // creating a new instance of user model
-    const user = new User({
-        firstName, 
-        lastName, 
-        emailId, 
-        password: passwordHash
-    });
-    await user.save();
-    res.send("User signup successfully");
-        
-    } catch (error) {
-        res.status(400).send("Error:" + error.message);
-    }
-
-});
-
-app.post("/login", async(req, res)=>{
-    try {
-        const { emailId, password} = req.body;
-
-        if(!validator.isEmail(emailId)){
-            throw new Error("Invalid credentials");
-        }
-        const user = await User.findOne({ emailId});
-         if(!user){
-            return res.status(400).send("user is not present with this emailId");
-        }
-        const isPasswordValid = await user.verifyPassword(password);
-        if(isPasswordValid){
-            // create a jwt token
-            const token = await user.getJwt();
-            // add the token to cookie and send back the response to user
-            res.cookie("token", token, { expires: new Date(Date.now() + 900000), httpOnly: true });
-            res.send("user logged in successfully");
-        }
-        else{
-            res.status(400).send("Invalid credentials");
-        }
-         
-    } catch (error) {
-        res.status(400).send("Error:"+ error.message);
-    }
-
-});
-
-// get profile of user
-app.get("/profile", userAuth, async(req, res)=>{
-    try {
-        const user = req.user;
-        res.send(user);
-
-    } catch (error) {
-        res.status(400).send("Error:"+ error.message);
-    }
-
-});
-
-// create send connection request
-app.post("/sendConnectionRequest", userAuth, async(req, res)=>{
-    try {
-        const user = req.user;
-        res.send(user.firstName + " send connect request");
-        
-    } catch (error) {
-         res.status(400).send("Error:"+ error.message);
-    }
-});
 // get user by emailid
 app.get("/getuser", async(req, res)=>{
    try {
