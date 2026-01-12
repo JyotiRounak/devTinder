@@ -23,7 +23,7 @@ authRouter.post("/signup", async(req, res)=>{
     res.send("User signup successfully");
         
     } catch (error) {
-        res.status(400).send("Error:" + error.message);
+        res.status(400).send(error.message);
     }
 
 });
@@ -52,7 +52,7 @@ authRouter.post("/login", async(req, res)=>{
         }
          
     } catch (error) {
-        res.status(400).send("Error:"+ error.message);
+        res.status(400).send(error.message);
     }
 
 });

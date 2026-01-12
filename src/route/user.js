@@ -64,6 +64,25 @@ userRouter.get("/user/feed", userAuth, async(req, res)=>{
         limit = limit > 50 ? 50 : limit;
         const skip = (page -1)*limit;
 
+        // Build filter object
+        const filters = {};
+        // gender filter
+        if(req.query.gender){
+            filters.gender = req.query.gender;
+        }
+        // min age filter
+        if(req.query.minAge){
+            filters.age = { $gte: parseInt(req.query.minAge)}
+        }
+        // max age filter
+        if(req.query.maxAge){
+            filters.age.$lte = parseInt(req.query.maxAge)
+        }
+        // skills filter
+        if(req.query.skills){
+            filters.skills = { $in: [req.query.skills]}
+        }
+
         // find all connection request which eihter i have sent or recieved
         const connectionRequests = await ConnectionRequest.find({
             $or: [
@@ -81,7 +100,8 @@ userRouter.get("/user/feed", userAuth, async(req, res)=>{
            $and:[{
             _id: { $nin: Array.from(hideUserFromFeed)},
            },
-          { _id: {$ne: loggedInUser._id}}
+          { _id: {$ne: loggedInUser._id}},
+          filters
         ]
         }).select("firstName lastName photoUrl age gender about skills").skip(skip).limit(limit);
         res.send(users);
