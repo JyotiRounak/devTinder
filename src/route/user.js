@@ -70,25 +70,23 @@ userRouter.get("/user/feed", userAuth, async(req, res)=>{
         if(req.query.gender){
             filters.gender = req.query.gender;
         }
-        // min age filter
-        if(req.query.minAge){
-            filters.age = { $gte: parseInt(req.query.minAge)}
-        }
-        // max age filter
-        if(req.query.maxAge){
-            filters.age.$lte = parseInt(req.query.maxAge)
-        }
+        if (req.query.minAge || req.query.maxAge) {
+            filters.age = {};
+            if (req.query.minAge) filters.age.$gte = parseInt(req.query.minAge);
+            if (req.query.maxAge) filters.age.$lte = parseInt(req.query.maxAge);
+            }
         // skills filter
-        if(req.query.skills){
-            filters.skills = { $in: [req.query.skills]}
-        }
+        if (req.query.skills) {
+      filters.skills = { $in: req.query.skills.split(",") };
+    }
 
         // find all connection request which eihter i have sent or recieved
         const connectionRequests = await ConnectionRequest.find({
             $or: [
                 {fromUserId: loggedInUser._id}, // either i have sendt connection request
                 {toUserId: loggedInUser._id}, // either i have recieved connection request
-            ]
+            ],
+            status: { $in: ["accepted", "ignored", "pending"]}
         }).select("fromUserId toUserId");
 
         const hideUserFromFeed = new Set();
@@ -96,15 +94,20 @@ userRouter.get("/user/feed", userAuth, async(req, res)=>{
             hideUserFromFeed.add(req.fromUserId.toString());
             hideUserFromFeed.add(req.toUserId.toString());
         });
+        // Also hide self
+    hideUserFromFeed.add(loggedInUser._id.toString());
         const users = await User.find({
-           $and:[{
-            _id: { $nin: Array.from(hideUserFromFeed)},
-           },
-          { _id: {$ne: loggedInUser._id}},
-          filters
-        ]
-        }).select("firstName lastName photoUrl age gender about skills").skip(skip).limit(limit);
-        res.send(users);
+          _id:{ $nin: Array.from(hideUserFromFeed)},
+          ...filters
+        }).select("firstName lastName photoUrl age gender about skills")
+        .sort({ createdAt: -1 })
+        .skip(skip).limit(limit);
+         res.status(200).json({
+      page,
+      limit,
+      count: users.length,
+      users
+    });
     }
     catch(error){
         res.status(400).send("Error: "+ error.message);

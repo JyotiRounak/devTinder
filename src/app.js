@@ -101,7 +101,11 @@ app.use("/", (err, req, res, next)=>{
         res.status(500).send("something went wrong")
     }
 });
-
+// disabling the browser cache
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 connecttoDatabase()
 .then(()=>{
     console.log("successfully connected to database");
