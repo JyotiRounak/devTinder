@@ -7,6 +7,7 @@ const profileRouter = require("./route/profile");
 const requestRouter = require("./route/request");
 const userRouter = require('./route/user');
 const cors = require("cors");
+const paymentRouter = require('./route/payment');
 require('dotenv').config();
 require("./utils/cronjob");
 const app = express();
@@ -20,6 +21,7 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
+app.use("/", paymentRouter);
 
 // get user by emailid
 app.get("/getuser", async(req, res)=>{
