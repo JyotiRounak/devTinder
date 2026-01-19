@@ -37,9 +37,9 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async(req, res)=
             status
          });
          const data = await connectionRequest.save();
-         const emailRes = await sendEmail.run(
-            `You just got a new connection request from ${req.user.firstName}`,
-            req.user.firstName + " is " + status + " to " + toUser.firstName, data);
+         // const emailRes = await sendEmail.run(
+         //    `You just got a new connection request from ${req.user.firstName}`,
+         //    req.user.firstName + " is " + status + " to " + toUser.firstName, data);
          
          res.json({ message: req.user.firstName + " is " + status + " to " + toUser.firstName, data})
         

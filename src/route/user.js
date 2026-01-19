@@ -86,7 +86,6 @@ userRouter.get("/user/feed", userAuth, async(req, res)=>{
                 {fromUserId: loggedInUser._id}, // either i have sendt connection request
                 {toUserId: loggedInUser._id}, // either i have recieved connection request
             ],
-            status: { $in: ["accepted", "ignored", "pending"]}
         }).select("fromUserId toUserId");
 
         const hideUserFromFeed = new Set();

@@ -7,7 +7,11 @@ const profileRouter = require("./route/profile");
 const requestRouter = require("./route/request");
 const userRouter = require('./route/user');
 const cors = require("cors");
+const http = require('node:http');
+const socket = require('socket.io');
 const paymentRouter = require('./route/payment');
+const chatRouter = require("./route/chat");
+const initializeSocket = require('./utils/socket');
 require('dotenv').config();
 require("./utils/cronjob");
 const app = express();
@@ -21,7 +25,8 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
-app.use("/", paymentRouter);
+app.use("/", chatRouter);
+//app.use("/", paymentRouter);
 
 // get user by emailid
 app.get("/getuser", async(req, res)=>{
@@ -110,10 +115,13 @@ app.use((req, res, next) => {
   res.set("Cache-Control", "no-store");
   next();
 });
+
+const server = http.createServer(app);
+initializeSocket(server);
 connecttoDatabase()
 .then(()=>{
     console.log("successfully connected to database");
-    app.listen(process.env.PORT, "0.0.0.0", ()=>{
+    server.listen(process.env.PORT, "0.0.0.0", ()=>{
         console.log("server is listening on port 3000");
     })
 })
