@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config();
 const connecttoDatabase = require("./config/database");
 const User = require('./models/user');
 const cookieParser = require('cookie-parser');
@@ -6,17 +7,18 @@ const authRouter = require("./route/auth");
 const profileRouter = require("./route/profile");
 const requestRouter = require("./route/request");
 const userRouter = require('./route/user');
+const cloudinaryRouter = require("./route/cloudinary")
 const cors = require("cors");
 const http = require('node:http');
 const socket = require('socket.io');
 const paymentRouter = require('./route/payment');
 const chatRouter = require("./route/chat");
 const initializeSocket = require('./utils/socket');
-require('dotenv').config();
 require("./utils/cronjob");
 const app = express();
 app.use(cors({
     origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], 
     credentials: true
 }));
 app.use(express.json());
@@ -26,6 +28,7 @@ app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use("/", chatRouter);
+app.use("/cloudinary", cloudinaryRouter);
 //app.use("/", paymentRouter);
 
 // get user by emailid

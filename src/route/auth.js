@@ -2,6 +2,7 @@ const express = require("express");
 const {vaildateSignupData} = require("../utils/validation");
 const User = require('../models/user');
 const validator = require('validator');
+const {sendEmail} = require("../utils/mailer");
 const authRouter = express.Router();
 
 //
@@ -25,6 +26,19 @@ authRouter.post("/signup", async(req, res)=>{
     // add the token to cookie and send back the response to user
     res.cookie("token", token, { expires: new Date(Date.now() + 900000), httpOnly: true });
     res.json({message: "User signup successfully", data: savedUser});
+
+    // 📧 Send welcome email (Keep your existing logic)
+        try {
+            await sendEmail(
+            savedUser.emailId,
+            "Welcome to DevConnect",
+            `Hi ${firstName},\n\nWelcome to DevConnect! We're excited to have you on board. Start connecting with like-minded developers and explore new opportunities.\n\nBest regards,\nThe DevConnect Team`,
+            `<p>Hi ${firstName},</p><p>Welcome to DevConnect! We're excited to have you on board. Start connecting with like-minded developers and explore new opportunities.</p><p>Best regards,<br>The DevConnect Team</p>`,
+            );
+            console.log("Welcome email sent successfully to:", savedUser.emailId);
+        } catch (emailError) {
+            console.error("Email failed:", emailError.message);
+        }
         
     } catch (error) {
         res.status(400).send(error.message);

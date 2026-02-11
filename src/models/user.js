@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema(
     age:{
         type: Number,
         min: 18,
-        max: 100,
+        max: 70,
         validate(value){
             if(value < 18){
                 throw new Error("Age must be 18 or above")
@@ -65,6 +65,10 @@ const userSchema = new mongoose.Schema(
                 throw new Error("URL is not valid:")
             }
         }
+    },
+    photoPublicId: {
+    type: String,
+    default: null,
     },
     about: {
         type: String,

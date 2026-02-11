@@ -2,6 +2,7 @@ const express = require("express");
 const { userAuth} = require("../middleware/auth");
 const { validateProfileEditData } = require("../utils/validation");
 const {verifyPassword} = require("../models/user");
+const cloudinary = require("../utils/cloudinary");
 const profileRouter = express.Router();
 
 // get profile of user
@@ -21,6 +22,12 @@ profileRouter.patch("/profile/edit", userAuth, async(req, res)=>{
             throw new Error("invalid updates")
         };
         const user = req.user; 
+        
+        // delete the old image if the user is uploading new image
+        if(req.body.photoPublicId && user.photoPublicId){
+            await cloudinary.uploader.destroy(user.photoPublicId);
+        }
+
         Object.keys(req.body).forEach((k)=>{
             user[k] = req.body[k];
         });
